@@ -3,6 +3,7 @@ import requests
 
 BACKEND_URL = "https://meeting-bot-backend.onrender.com"
 
+
 def main():
     print("🚀 Worker Render démarré (bot cloud).")
 
@@ -13,11 +14,12 @@ def main():
             resp.raise_for_status()
             meeting = resp.json()
         except Exception as e:
-            print("Erreur en contactant le backend :", e)
+            print("❌ Erreur en contactant le backend :", e)
             time.sleep(30)
             continue
 
         status = meeting.get("status")
+
         if status == "none":
             print("Aucune réunion à rejoindre pour le moment.")
         else:
@@ -31,17 +33,24 @@ def main():
             print(f"- Titre    : {title}")
             print(f"- URL      : {url}")
             print(f"- Début    : {start_time}")
-            print("👉 (Étape suivante : ici le bot rejoindra la réunion en headless)")
 
-            # Ici, plus tard :
-            # - lancer un navigateur headless (Playwright)
-            # - rejoindre la réunion
-            # - enregistrer l'audio
-            # - envoyer l'audio à Whisper
-            # - mettre à jour le status dans le backend
+            # 🔑 NOUVEAU : marquer la réunion comme "in_progress"
+            try:
+                mark_resp = requests.post(
+                    f"{BACKEND_URL}/mark_meeting_started",
+                    json={"meeting_id": mid},
+                    timeout=10,
+                )
+                mark_resp.raise_for_status()
+                print("✅ Réunion marquée comme 'in_progress' côté backend.")
+            except Exception as e:
+                print("❌ Erreur lors du marquage 'in_progress' :", e)
+
+            print("👉 (Étape suivante : ici le bot rejoindra la réunion en headless)")
 
         # on attend 30 secondes avant de re-check
         time.sleep(30)
+
 
 if __name__ == "__main__":
     main()
