@@ -7,7 +7,6 @@ import dateutil.parser
 
 app = FastAPI()
 
-# Dictionnaire en mémoire pour stocker les réunions
 MEETINGS: Dict[str, dict] = {}
 
 class ScheduleMeetingRequest(BaseModel):
@@ -43,7 +42,6 @@ def meeting_summary(meeting_id: str):
             "error_message": "Réunion introuvable"
         }
 
-    # Pour l’instant on renvoie un faux résumé
     return {
         "status": "done",
         "title": meeting["title"],
@@ -55,9 +53,16 @@ def meeting_summary(meeting_id: str):
 
 @app.get("/meetings_to_join")
 def meetings_to_join():
-    """
-    Retourne les réunions qui doivent être rejointes maintenant ou dans quelques minutes.
-    Version simple : renvoie toutes les réunions 'scheduled'.
-    Tu pourras filtrer côté bot.
-    """
+    # renvoie toutes les réunions scheduled pour debug
     return list(MEETINGS.values())
+
+@app.get("/next_meeting_to_join")
+def next_meeting_to_join():
+    """
+    Renvoie UNE seule réunion à rejoindre en priorité (la plus proche).
+    Pour l'instant, on prend juste la première 'scheduled'.
+    """
+    for m in MEETINGS.values():
+        if m.get("status") == "scheduled":
+            return m
+    return {"status": "none"}
