@@ -1,6 +1,7 @@
 import time
 import requests
 
+# URL de ton backend Render
 BACKEND_URL = "https://meeting-bot-backend.onrender.com"
 
 
@@ -9,7 +10,7 @@ def main():
 
     while True:
         try:
-            # Récupérer la prochaine réunion à rejoindre
+            # 1) Récupérer la prochaine réunion à rejoindre
             resp = requests.get(f"{BACKEND_URL}/next_meeting_to_join", timeout=10)
             resp.raise_for_status()
             meeting = resp.json()
@@ -34,7 +35,7 @@ def main():
             print(f"- URL      : {url}")
             print(f"- Début    : {start_time}")
 
-            # 🔑 NOUVEAU : marquer la réunion comme "in_progress"
+            # 2) Marquer la réunion comme "in_progress" pour éviter les répétitions
             try:
                 mark_resp = requests.post(
                     f"{BACKEND_URL}/mark_meeting_started",
@@ -48,7 +49,7 @@ def main():
 
             print("👉 (Étape suivante : ici le bot rejoindra la réunion en headless)")
 
-        # on attend 30 secondes avant de re-check
+        # 3) Attendre avant de re-check
         time.sleep(30)
 
 
